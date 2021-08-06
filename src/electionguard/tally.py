@@ -44,6 +44,9 @@ class CiphertextTallySelection(ElectionObjectBase, CiphertextSelection):
     CiphertextBallotSelection instances for a specific selection in an election.
     """
 
+    sequence_order: int
+    """Order of the selection."""
+
     description_hash: ElementModQ
     """
     The SelectionDescription hash
@@ -366,7 +369,9 @@ class CiphertextTally(ElectionObjectBase, Container, Sized):
             contest_selections: Dict[str, CiphertextTallySelection] = {}
             for selection in contest.ballot_selections:
                 contest_selections[selection.object_id] = CiphertextTallySelection(
-                    selection.object_id, selection.crypto_hash()
+                    selection.object_id,
+                    selection.sequence_order,
+                    selection.crypto_hash(),
                 )
 
             cast_collection[contest.object_id] = CiphertextTallyContest(

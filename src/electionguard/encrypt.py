@@ -126,8 +126,9 @@ def selection_from(
 
     return PlaintextBallotSelection(
         description.object_id,
-        vote=1 if is_affirmative else 0,
-        is_placeholder_selection=is_placeholder,
+        description.sequence_order,
+        1 if is_affirmative else 0,
+        is_placeholder,
     )
 
 
@@ -200,15 +201,16 @@ def encrypt_selection(
 
     # Create the return object
     encrypted_selection = make_ciphertext_ballot_selection(
-        object_id=selection.object_id,
-        description_hash=selection_description_hash,
-        ciphertext=get_optional(elgamal_encryption),
-        elgamal_public_key=elgamal_public_key,
-        crypto_extended_base_hash=crypto_extended_base_hash,
-        proof_seed=disjunctive_chaum_pedersen_nonce,
-        selection_representation=selection_representation,
-        is_placeholder_selection=is_placeholder,
-        nonce=selection_nonce,
+        selection.object_id,
+        selection.sequence_order,
+        selection_description_hash,
+        get_optional(elgamal_encryption),
+        elgamal_public_key,
+        crypto_extended_base_hash,
+        disjunctive_chaum_pedersen_nonce,
+        selection_representation,
+        is_placeholder,
+        selection_nonce,
     )
 
     if encrypted_selection.proof is None:

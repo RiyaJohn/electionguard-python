@@ -10,7 +10,7 @@ from .chaum_pedersen import (
     make_constant_chaum_pedersen,
     make_disjunctive_chaum_pedersen,
 )
-from .election_object_base import ElectionObjectBase
+from .election_object_base import ElectionObjectBase, OrderedObjectBase
 from .elgamal import ElGamalCiphertext, elgamal_add
 from .group import add_q, ElementModP, ElementModQ, ZERO_MOD_Q
 from .hash import CryptoHashCheckable, hash_elems
@@ -43,7 +43,7 @@ class ExtendedData:
 
 
 @dataclass(unsafe_hash=True)
-class PlaintextBallotSelection(ElectionObjectBase):
+class PlaintextBallotSelection(OrderedObjectBase):
     """
     A BallotSelection represents an individual selection on a ballot.
 
@@ -112,6 +112,9 @@ class CiphertextSelection(Protocol):
 
     object_id: str
 
+    sequence_order: int
+    """Order the selection."""
+
     description_hash: ElementModQ
     """The SelectionDescription hash"""
 
@@ -121,7 +124,7 @@ class CiphertextSelection(Protocol):
 
 @dataclass(eq=True, unsafe_hash=True)
 class CiphertextBallotSelection(
-    ElectionObjectBase, CiphertextSelection, CryptoHashCheckable
+    OrderedObjectBase, CiphertextSelection, CryptoHashCheckable
 ):
     """
     A CiphertextBallotSelection represents an individual encrypted selection on a ballot.
@@ -238,6 +241,7 @@ def _ciphertext_ballot_selection_crypto_hash_with(
 
 def make_ciphertext_ballot_selection(
     object_id: str,
+    sequence_order: int,
     description_hash: ElementModQ,
     ciphertext: ElGamalCiphertext,
     elgamal_public_key: ElementModP,
@@ -275,14 +279,15 @@ def make_ciphertext_ballot_selection(
         )
 
     return CiphertextBallotSelection(
-        object_id=object_id,
-        description_hash=description_hash,
-        ciphertext=ciphertext,
-        is_placeholder_selection=is_placeholder_selection,
-        nonce=nonce,
-        crypto_hash=crypto_hash,
-        proof=proof,
-        extended_data=extended_data,
+        object_id,
+        sequence_order,
+        description_hash,
+        ciphertext,
+        crypto_hash,
+        is_placeholder_selection,
+        nonce,
+        proof,
+        extended_data,
     )
 
 
